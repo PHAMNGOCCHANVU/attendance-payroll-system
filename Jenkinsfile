@@ -40,13 +40,14 @@ pipeline {
             steps {
                 echo "=== Đang biên dịch ứng dụng với cấu hình ${CONFIGURATION} ==="
                 bat "dotnet build ${PROJECT_MAIN} --configuration ${CONFIGURATION} --no-restore"
+                bat "dotnet build ${PROJECT_TEST} --configuration ${CONFIGURATION} --no-restore"
             }
         }
 
         stage('Run Unit Tests') {
             steps {
                 echo '=== Đang chạy kiểm thử tự động (Unit Tests) ==='
-                bat "dotnet test ${PROJECT_TEST} --configuration ${CONFIGURATION} --no-build --logger \"trx;LogFileName=mstest_results.trx\" --results-directory \"${TEST_RESULTS_DIR}\""
+                bat "dotnet test ${PROJECT_TEST} --configuration ${CONFIGURATION} --no-restore --logger \"trx;LogFileName=mstest_results.trx\" --results-directory \"${TEST_RESULTS_DIR}\""
             }
         }
 
@@ -55,17 +56,17 @@ pipeline {
                 echo '=== Lưu trữ file thực thi (Executable Artifacts) ==='
                 archiveArtifacts artifacts: "cuoiky/bin/${CONFIGURATION}/**/*", 
                                  fingerprint: true, 
-                                 allowEmptyArchive: false
+                                 allowEmptyArchive: true
             }
         }
     }
 
     post {
         always {
-            // Thu thập và hiển thị báo cáo kết quả kiểm thử trên Jenkins UI
-            mstest testResultsFile: "**/${TEST_RESULTS_DIR}/*.trx", 
-                   keepLongStdio: true, 
-                   failOnError: false
+            // Lưu trữ file kết quả kiểm thử (.trx) vào artifacts của Jenkins (không phụ thuộc plugin ngoài)
+            archiveArtifacts artifacts: "${TEST_RESULTS_DIR}/**/*.trx", 
+                             fingerprint: true, 
+                             allowEmptyArchive: true
         }
         success {
             echo " Pipeline hoàn thành thành công cho bản build #${BUILD_NUMBER}!"
