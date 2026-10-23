@@ -1,2 +1,0 @@
-# cuoiky
-Dự án BMCSDL
