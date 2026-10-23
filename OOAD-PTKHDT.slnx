@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="cuoiky.Tests/cuoiky.Tests.csproj" />
+  <Project Path="cuoiky/cuoiky.csproj" />
+</Solution>
